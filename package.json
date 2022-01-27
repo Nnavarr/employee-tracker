@@ -1,0 +1,25 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "The Employee Tracker is an node based command line application that acts as content management system (CMS). The content, as the name suggests, are a list of employees with various departments, titles, and salaries.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nnavarr/employee-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nnavarr/employee-tracker/issues"
+  },
+  "homepage": "https://github.com/Nnavarr/employee-tracker#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3"
+  }
+}
