@@ -20,7 +20,7 @@ const mainMenu = () => {
         }
     ])
     .then(answer => {
-        viewEmployees();
+        addDepartment();
     })
     .then(answer => {
         mainMenu();
@@ -82,6 +82,32 @@ const viewEmployees = () => {
             return;
         }
         console.table(rows);
+    })
+}
+
+// add department
+const addDepartment = () => {
+    const sql = `
+    INSERT INTO department (name)
+    VALUES (?)
+    `
+    inquirer.prompt([
+        {
+            type: 'input', 
+            name:'department',
+            message: 'What is the departments name?'
+        }
+    ])
+    .then(answer => {
+        let department = [answer.department]
+
+        db.query(sql, department, (err, rows) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log(`The ${answer.department} has been added to the department table`)
+        } )
     })
 }
 
