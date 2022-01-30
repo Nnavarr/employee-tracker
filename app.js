@@ -21,8 +21,6 @@ const viewDepartments = async () => {
         `)
         console.table(rows)
     })   
-
-    return 1
 }
 
 // view all roles functionality
@@ -333,7 +331,7 @@ async function questions() {
         await optionFunctions[response]()
 
         if (answer.sequence.includes('Add') || answer.sequence.includes('Update')) {
-            setTimeout(questions, 15000);
+            setTimeout(questions, 20000);
         } else {
             console.clear();
             questions();
