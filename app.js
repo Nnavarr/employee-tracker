@@ -2,33 +2,11 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 const db = require('./config/config.js');
-
-// main options 
-const mainMenuOptions = [
-    'View all departments', 'View all roles', 'View all employees', 
-    'Add a department', 'Add a role', 'Add an employee', 'Update an employee'
-]
-
-// main menu function to prompt user for next app action
-const mainMenu = () => {
-    inquirer.prompt([
-        {
-            type: 'list',
-            name: 'mainMenu',
-            message: 'Welcome to the Employee Tracker! What would you like to do?',
-            choices: mainMenuOptions
-        }
-    ])
-    .then(answer => {
-        addNewRole();
-    })
-    .then(answer => {
-        mainMenu();
-    })
-}
+const figlet = require('figlet')
 
 // view all departments functionality 
-const viewDepartments = () => {
+const viewDepartments = async () => {
+    console.clear()
     const sql = 'SELECT * FROM department';
 
     // query database
@@ -38,12 +16,18 @@ const viewDepartments = () => {
             return
         }
         // show response as table
+        console.log(`
+        
+        `)
         console.table(rows)
     })   
+
+    return 1
 }
 
 // view all roles functionality
 const viewRoles = () => {
+    console.clear()
     const sql = 'SELECT * FROM role'
 
     // query database
@@ -53,12 +37,16 @@ const viewRoles = () => {
             return
         }
         // show response as table
+        console.log(`
+        
+        `)
         console.table(rows);
     })
 }
 
 // view all employees
 const viewEmployees = () => {
+    console.clear()
     const sql = `
     SELECT
         employee.id, 
@@ -81,12 +69,16 @@ const viewEmployees = () => {
             console.log(err);
             return;
         }
+        console.log(`
+        
+        `)
         console.table(rows);
     })
 }
 
 // add department
 const addDepartment = () => {
+    console.clear()
     const sql = `
     INSERT INTO department (name)
     VALUES (?)
@@ -106,6 +98,9 @@ const addDepartment = () => {
                 console.log(err);
                 return;
             }
+            console.log(`
+        
+            `)
             console.log(`The ${answer.department} has been added to the department table`)
         } )
     })
@@ -113,6 +108,7 @@ const addDepartment = () => {
 
 // add new role
 const addNewRole = () => {
+    console.clear()
     const sql = `
     INSERT INTO role (title, salary, department_id)
     VALUES (?, ?, ?)
@@ -163,6 +159,9 @@ const addNewRole = () => {
                     console.log(err);
                     return;
                 }
+                console.log(`
+        
+                `)
                 console.log(`The ${role} has been added to the database!`);
             })
         })
@@ -170,7 +169,8 @@ const addNewRole = () => {
 }
 
 // add new employee
-const addNewEmployee = () => {
+const addNewEmployee =  () => {
+    console.clear();
     const sql = `
     INSERT INTO employee (first_name, last_name, role_id, manager_id)
     VALUES (?, ?, ?, ?)
@@ -238,6 +238,9 @@ const addNewEmployee = () => {
                 console.log(err);
                 return;
             }
+            console.log(`
+        
+            `)
             console.log(`The new employee ${firstName} ${lastName} has been added!`)
         })
         })        
@@ -246,7 +249,7 @@ const addNewEmployee = () => {
 
 // update employee value
 const updateEmployee = () => {
-
+    console.clear()
     const sql = `
     UPDATE employee
     SET role_id = ?
@@ -257,12 +260,12 @@ const updateEmployee = () => {
     // employee container 
     let employeeContainer = []
 
-    let employees = db.query("SELECT CONCAT(first_name, ' ', last_name) as 'employee' FROM employee", (err, row) => {
+    db.query("SELECT CONCAT(first_name, ' ', last_name) as 'employee' FROM employee", (err, row) => {
         if (err) {
             console.log(err);
             return;
         }
-        // append each employee to the list to be passed into inquirer
+        // append each employee to the list to be passe d into inquirer
         row.forEach(item => employeeContainer.push(item.employee))
 
         // prompt user input for employee
@@ -282,23 +285,68 @@ const updateEmployee = () => {
         .then(answer => {
             let employeeName = answer.employee.split(' ').join('').toLowerCase();
             let newRole = answer.newRole[0];
-
-            console.log(employeeName)
-            console.log(newRole)
-
+            
             // run update query 
             db.query(sql, [newRole, employeeName], (err, row) => {
                 if (err) {
                     console.log(err);
                     return;
                 }
+                console.log(`
+        
+                `)
                 console.log(`The role has been updated!`)
             })
         })
     })
 }
 
-// call the main menu function
-// mainMenu();
+// main options 
+const mainMenuOptions = [
+    'View all departments', 'View all roles', 'View all employees', 
+    'Add a department', 'Add a role', 'Add an employee', 'Update an employee'
+]
 
-updateEmployee();
+// option to function object
+const optionFunctions = {
+    'View all departments': viewDepartments,
+    'View all roles': viewRoles,
+    'View all employees': viewEmployees,
+    'Add a department': addDepartment,
+    'Add a role': addNewRole,
+    'Add an employee': addNewEmployee,
+    'Update an employee': updateEmployee
+}
+
+async function questions() {
+    await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'sequence', 
+            message: 'What would you like to do?',
+            choices: mainMenuOptions
+        }
+    ])
+    .then(async (answer) => {
+        // match the response to the function 
+        let response = answer.sequence;
+        await optionFunctions[response]()
+
+        if (answer.sequence.includes('Add') || answer.sequence.includes('Update')) {
+            setTimeout(questions, 15000);
+        } else {
+            console.clear();
+            questions();
+        }
+    })
+}
+
+// create command line banner
+figlet('Employee Tracker', function(err, data) {
+    if (err) {
+        console.log('The banner did not generate correctly');
+        return;
+    }
+    console.log(data)
+    questions();
+})
